@@ -233,8 +233,11 @@ export const SWIMMING_COLOR = 'rgb(255,51,51)';
 export const MAP_TILE_VENDOR = 'mapcn';
 
 // map tiles style name, see MAP_TILE_STYLES for more details
-export const MAP_TILE_STYLE_LIGHT = 'osm-bright';
-export const MAP_TILE_STYLE_DARK = 'dark-matter';
+
+// export const MAP_TILE_STYLE_LIGHT = 'osm-bright';
+// export const MAP_TILE_STYLE_DARK = 'dark-matter';
+export const MAP_TILE_STYLE_LIGHT = 'light';
+export const MAP_TILE_STYLE_DARK = 'dark';
 
 // access token. you can apply a new one, it's free.
 // maptiler: Gt5R0jT8tuIYxW6sNrAg | sign up at https://cloud.maptiler.com/auth/widget
