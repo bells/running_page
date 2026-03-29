@@ -785,7 +785,7 @@ if __name__ == "__main__":
         j.login_by_phone()
 
     generator = Generator(SQL_FILE)
-    old_tracks_ids = generator.get_old_tracks_ids()
+    old_tracks_ids = generator.get_old_tracks_ids() # todo 支持重新拉取所有的
     tracks = j.get_all_joyrun_tracks(
         old_tracks_ids, options.with_gpx, options.with_tcx, options.threshold
     )
