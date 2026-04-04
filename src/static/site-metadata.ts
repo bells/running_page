@@ -15,9 +15,9 @@ const getBasePath = () => {
 };
 
 const data: ISiteMetadataResult = {
-  siteTitle: 'Running Page',
+  siteTitle: 'Watson Running Page',
   siteUrl: 'https://run.watsonzhu.cn/',
-  logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTtc69JxHNcmN1ETpMUX4dozAgAN6iPjWalQ&usqp=CAU',
+  logo: `${getBasePath()}/images/logo.png`,
   description: 'Personal site and blog',
   navLinks: [
     {
