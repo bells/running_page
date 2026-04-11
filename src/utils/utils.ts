@@ -53,6 +53,7 @@ export interface Activity {
   elevation_gain: number | null;
   average_speed: number;
   streak: number;
+  week_streak?: number;
 }
 
 const titleForShow = (run: Activity): string => {

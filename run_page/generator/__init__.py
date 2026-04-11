@@ -137,6 +137,7 @@ class Generator:
         activity_list = []
 
         streak = 0
+        week_streak = 0
         last_date = None
         for activity in activities:
             # Determine running streak.
@@ -145,14 +146,32 @@ class Generator:
             ).date()
             if last_date is None:
                 streak = 1
+                week_streak = 1
             elif date == last_date:
                 pass
-            elif date == last_date + datetime.timedelta(days=1):
-                streak += 1
             else:
-                assert date > last_date
-                streak = 1
+                # Calculate day streak
+                if date == last_date + datetime.timedelta(days=1):
+                    streak += 1
+                else:
+                    streak = 1
+
+                # Calculate week streak
+                # Get the Monday of each week to compare
+                current_week_monday = date - datetime.timedelta(days=date.weekday())
+                last_week_monday = last_date - datetime.timedelta(days=last_date.weekday())
+                if current_week_monday == last_week_monday:
+                    # same week
+                    pass
+                elif current_week_monday == last_week_monday + datetime.timedelta(weeks=1):
+                    # consecutive week
+                    week_streak += 1
+                else:
+                    # gap between weeks
+                    week_streak = 1
+
             activity.streak = streak  # type: ignore
+            activity.week_streak = week_streak  # type: ignore
             last_date = date
             if not IGNORE_BEFORE_SAVING:
                 activity.summary_polyline = filter_out(activity.summary_polyline)  # type: ignore

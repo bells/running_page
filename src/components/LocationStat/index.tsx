@@ -32,10 +32,10 @@ const LocationStat = ({
       </p>
     </section>
     <hr />
+    <YearStat year="Total" onClick={changeYear} />
     <LocationSummary />
     <CitiesStat onClick={changeCity} />
     <PeriodStat onClick={changeTitle} />
-    <YearStat year="Total" onClick={changeYear} />
   </div>
 );
 

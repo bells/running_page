@@ -14,11 +14,14 @@ const YearsStat = ({
 
   // Memoize the years array calculation
   const yearsArrayUpdate = useMemo(() => {
-    // make sure the year click on front
-    let updatedYears = years.slice();
-    updatedYears.push('Total');
-    updatedYears = updatedYears.filter((x) => x !== year);
-    updatedYears.unshift(year);
+    // Total should always be first
+    let updatedYears = years.filter((x) => x !== year);
+    if (year === 'Total') {
+      updatedYears.unshift('Total');
+    } else {
+      updatedYears.unshift(year);
+      updatedYears.unshift('Total');
+    }
     return updatedYears;
   }, [years, year]);
 

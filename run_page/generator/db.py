@@ -65,6 +65,7 @@ class Activity(Base):
     average_speed = Column(Float)
     elevation_gain = Column(Float)
     streak = None
+    week_streak = None
 
     def to_dict(self):
         out = {}
@@ -77,6 +78,8 @@ class Activity(Base):
 
         if self.streak:
             out["streak"] = self.streak
+        if self.week_streak:
+            out["week_streak"] = self.week_streak
 
         return out
 

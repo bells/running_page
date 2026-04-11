@@ -29,6 +29,7 @@ const YearStat = ({
   }
   let sumDistance = 0;
   let streak = 0;
+  let weekStreak = 0;
   let sumElevationGain = 0;
   let _pace = 0;
   let _paceNullCount = 0;
@@ -54,6 +55,9 @@ const YearStat = ({
     if (run.streak) {
       streak = Math.max(streak, run.streak);
     }
+    if (run.week_streak) {
+      weekStreak = Math.max(weekStreak, run.week_streak);
+    }
   });
   sumDistance = parseFloat((sumDistance / M_TO_DIST).toFixed(1));
   const sumElevationGainStr = (sumElevationGain * M_TO_ELEV).toFixed(0);
@@ -73,6 +77,9 @@ const YearStat = ({
         )}
         <Stat value={avgPace} description=" Avg Pace" />
         <Stat value={`${streak} day`} description=" Streak" />
+        {year === 'Total' && (
+          <Stat value={`${weekStreak} week`} description=" Streak" />
+        )}
         {hasHeartRate && (
           <Stat value={avgHeartRate} description=" Avg Heart Rate" />
         )}
