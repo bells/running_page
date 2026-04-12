@@ -33,9 +33,7 @@ const YearsStat = ({
   return (
     <div className="w-full pb-16 pr-16 lg:w-full lg:pr-16">
       <section className="pb-0">
-        <p className="text-2xl font-bold">
-          So live a life you will remember!
-        </p>
+        <p className="text-2xl font-bold">So live a life you will remember!</p>
         <p className="leading-relaxed">
           {infoMessage}
           <br />

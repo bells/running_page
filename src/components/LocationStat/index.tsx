@@ -24,11 +24,10 @@ const LocationStat = ({
         {CHINESE_LOCATION_INFO_MESSAGE_FIRST}
         .
         <br />
-        <br /> 
+        <br />
         {CHINESE_LOCATION_INFO_MESSAGE_SECOND}
         .
         <br />
-
       </p>
     </section>
     <hr />
