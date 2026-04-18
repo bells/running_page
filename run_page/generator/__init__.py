@@ -264,11 +264,15 @@ class Generator:
                 # Calculate week streak
                 # Get the Monday of each week to compare
                 current_week_monday = date - datetime.timedelta(days=date.weekday())
-                last_week_monday = last_date - datetime.timedelta(days=last_date.weekday())
+                last_week_monday = last_date - datetime.timedelta(
+                    days=last_date.weekday()
+                )
                 if current_week_monday == last_week_monday:
                     # same week
                     pass
-                elif current_week_monday == last_week_monday + datetime.timedelta(weeks=1):
+                elif current_week_monday == last_week_monday + datetime.timedelta(
+                    weeks=1
+                ):
                     # consecutive week
                     week_streak += 1
                 else:

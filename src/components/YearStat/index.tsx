@@ -76,12 +76,12 @@ const YearStat = ({
           <Stat value={sumElevationGainStr} description=" Elevation Gain" />
         )}
         <Stat value={avgPace} description=" Avg Pace" />
+        {hasHeartRate && (
+          <Stat value={avgHeartRate} description=" Avg Heart Rate" />
+        )}
         <Stat value={`${streak} day`} description=" Streak" />
         {year === 'Total' && (
           <Stat value={`${weekStreak} week`} description=" Streak" />
-        )}
-        {hasHeartRate && (
-          <Stat value={avgHeartRate} description=" Avg Heart Rate" />
         )}
       </section>
       {year !== 'Total' && hovered && (
