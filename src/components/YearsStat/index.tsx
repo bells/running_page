@@ -50,7 +50,7 @@ const YearsStat = ({
 
   return (
     <div className="w-full pb-16 pr-16 lg:w-full lg:pr-16">
-      <section className="pb-0">
+      <section className="mt-0 pb-0 pt-0">
         <p className="text-2xl font-bold">So live a life you will remember!</p>
         <p className="leading-relaxed">
           {infoMessage}
