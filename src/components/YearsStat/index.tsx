@@ -34,7 +34,15 @@ const YearsStat = ({
     }
   }, [year, regularYears]);
 
-  // 循环切换下一个年份（向右箭头）
+  // 切换到上一个年份（向右箭头，年份更大/更新）
+  const handlePrevYear = () => {
+    const prevIndex =
+      (currentYearIndex - 1 + regularYears.length) % regularYears.length;
+    setCurrentYearIndex(prevIndex);
+    onClick(regularYears[prevIndex]);
+  };
+
+  // 切换到下一个年份（向左箭头，年份更小/更早）
   const handleNextYear = () => {
     const nextIndex = (currentYearIndex + 1) % regularYears.length;
     setCurrentYearIndex(nextIndex);
@@ -63,6 +71,27 @@ const YearsStat = ({
       <hr />
       {/* 年份切换区域 */}
       <div className="flex items-center justify-between py-2">
+        {/* 向左箭头 - 查看更早的年份（年份更小） */}
+        <button
+          onClick={handleNextYear}
+          className="mr-4 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
+          title="查看更早的年份"
+        >
+          <svg
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+
         <div className="flex-1">
           <YearStat
             key={currentDisplayYear}
@@ -70,10 +99,12 @@ const YearsStat = ({
             onClick={onClick}
           />
         </div>
+
+        {/* 向右箭头 - 查看更新的年份（年份更大） */}
         <button
-          onClick={handleNextYear}
+          onClick={handlePrevYear}
           className="ml-4 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
-          title="查看上一年"
+          title="查看更新的年份"
         >
           <svg
             className="h-5 w-5"

@@ -22,6 +22,9 @@ const useActivities = () => {
     const countries: Set<string> = new Set();
     const years: Set<string> = new Set();
 
+    // 直接添加“中国”作为唯一国家，不再从 location 解析（因为 location_country 主要存的是省名）
+    countries.add('中国');
+
     activities.forEach((run) => {
       const location = locationForRun(run);
 
@@ -32,7 +35,7 @@ const useActivities = () => {
           : 1;
       }
 
-      const { city, province, country } = location;
+      const { city, province } = location;
       // drop only one char city
       if (city.length > 1) {
         cities[city] = cities[city]
@@ -40,7 +43,6 @@ const useActivities = () => {
           : run.distance;
       }
       if (province) provinces.add(province);
-      if (country) countries.add(standardizeCountryName(country));
       const year = run.start_date_local.slice(0, 4);
       years.add(year);
     });

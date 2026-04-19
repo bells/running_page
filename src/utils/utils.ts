@@ -166,21 +166,39 @@ const locationForRun = (
   if (location) {
     // Only for Chinese now
     // should filter 臺灣
-    const cityMatch = extractCities(location);
-    const provinceMatch = location.match(/[\u4e00-\u9fa5]{2,}(省|自治区)/);
 
-    if (cityMatch) {
-      city = cities.find((value) => cityMatch.includes(value)) as string;
+    // 处理格式 "城市:省份" 的情况
+    if (location.includes(':')) {
+      const parts = location.split(':');
+      city = parts[0].trim();
+      province = parts[1].trim();
+      // 如果 province 没有 "省" 字，补上
+      if (
+        !province.includes('省') &&
+        !province.includes('自治区') &&
+        !province.includes('市')
+      ) {
+        province = province + '省';
+      }
+    } else {
+      // 原来的逻辑
+      const cityMatch = extractCities(location);
+      const provinceMatch = location.match(/[\u4e00-\u9fa5]{2,}(省|自治区)/);
 
-      if (!city) {
-        city = '';
+      if (cityMatch) {
+        city = cities.find((value) => cityMatch.includes(value)) as string;
+
+        if (!city) {
+          city = '';
+        }
+      }
+      if (provinceMatch) {
+        [province] = provinceMatch;
+        // try to extract city coord from location_country info
+        coordinate = extractCoordinate(location);
       }
     }
-    if (provinceMatch) {
-      [province] = provinceMatch;
-      // try to extract city coord from location_country info
-      coordinate = extractCoordinate(location);
-    }
+
     const l = location.split(',');
     // or to handle keep location format
     let countryMatch = l[l.length - 1].match(
