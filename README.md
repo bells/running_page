@@ -130,8 +130,9 @@ English | [简体中文](https://github.com/yihong0618/running_page/blob/master/
 | [itrunner](https://itrunner.cn)                      | <https://itrunner.cn>                          | Garmin      |
 | [maslke](https://github.com/maslke)                  | <https://maslke.space/running_page/>           | Garmin-cn   |
 | [Niewei Yang](https://github.com/Niewei-Yang)        | <https://neewii-worksout.vercel.app/>          | Strava      |
-| [RUN.LOG](https://github.com/bzzd2001)            | <https://run.731558.xyz:6881/>                 | Strava      |
-| [StoneRicky](https://github.com/StoneRicky)       | <https://stonericky.github.io/running_page/>   | COROS       |
+| [RUN.LOG](https://github.com/bzzd2001)               | <https://run.731558.xyz:6881/>                 | Strava      |
+| [StoneRicky](https://github.com/StoneRicky)          | <https://stonericky.github.io/running_page/>   | COROS       |
+| [coutureone](https://github.com/coutureone)          | <https://run.xcouture.cc/>                     | Garmin      |
 </details>
 
 ## How it works
@@ -146,6 +147,7 @@ English | [简体中文](https://github.com/yihong0618/running_page/blob/master/
 4. Mapbox for map display
 5. Supports most sports apps such as nike strava...
 6. Support for metric and imperial units
+7. Terminal UI (TUI) for browsing activities locally
 
 > automatically backup gpx data for easy backup and uploading to other software.
 >
@@ -193,6 +195,30 @@ pnpm develop
 
 Open your browser and visit <http://localhost:5173/>
 
+## TUI (Terminal UI)
+
+You can browse your activities in the terminal using the built-in Textual TUI.
+
+```bash
+# Using make
+make tui
+
+# Or run directly with uv
+uv run run_page
+
+# Or specify a custom activities.json path
+uv run run_page /path/to/your/activities.json
+```
+
+Keyboard shortcuts inside TUI:
+
+- `1` / `2` – Switch between List and Stats views
+- `←` / `→` – Change year filter
+- `↑` / `↓` – Navigate activities
+- `y` – Cycle through years
+- `t` – Cycle through activity types
+- `q` – Quit
+
 ## Docker
 
 ```bash
@@ -231,17 +257,44 @@ Open your browser and visit localhost:80
 
 ### Modifying Mapbox token
 
-> If you use English please change `IS_CHINESE = false` in `src/utils/const.ts` <br>
-> Suggested changes to your own [Mapbox token](https://www.mapbox.com/)
+> **Security Notice**: The Mapbox token has been migrated from `src/themes/classic/utils/const.ts` to `config.yml` for better security management.
+>
+> **For GitHub Actions / Automated Deployment**:
+> 1. Go to your repository's **Settings → Secrets and variables → Actions**
+> 2. Create a new secret named `MAPBOX_TOKEN` with your Mapbox token value
+> 3. The build process automatically injects this token during GitHub Actions workflow execution
+> 4. You should NOT commit your token to the repository
+>
+> **Priority Order**:
+> - GitHub Actions Secret (`MAPBOX_TOKEN` env var) takes priority
+> - Falls back to `config.yml` mapbox_token if secret is not set
+> - Defaults to empty string if neither is available
 
-```typescript
-const MAPBOX_TOKEN =
-  'pk.eyJ1IjoieWlob25nMDYxOCIsImEiOiJja2J3M28xbG4wYzl0MzJxZm0ya2Fua2p2In0.PNKfkeQwYuyGOTT_x9BJ4Q';
+Set your [Mapbox token](https://www.mapbox.com/) in one of these ways:
+
+**Option 1: GitHub Actions Secret (Recommended for GitHub Pages)**
+```bash
+# Add MAPBOX_TOKEN to your repository secrets
+# No changes needed to config.yml - it will use the secret automatically
 ```
 
-## Change Default Map Tile Style
+**Option 2: Local Development with config.yml**
+```yaml
+# config.yml
+mapbox_token: 'pk.eyJ1...your-token-here'
+```
 
-> In addition to using the default map tile style, you can customize the map display by modifying the following configurations in `src/utils/const.ts`:
+**Option 3: Environment Variable (Local Development)**
+```bash
+export VITE_MAPBOX_TOKEN='pk.eyJ1...your-token-here'
+pnpm develop
+```
+
+> **Important**: Do not use the project maintainer's token - check this [issue](https://github.com/yihong0618/running_page/issues/643) and [issue #1055](https://github.com/yihong0618/running_page/issues/1055) for security and rate limit concerns.
+
+## Change Default Map Tile Style (Classic Theme)
+
+> If using the **classic** theme, you can customize the map tile style in the classic theme's configuration. The dashboard theme uses Mapbox by default (configured via `config.yml`).
 
 ```typescript
 const MAP_TILE_VENDOR = 'mapcn'; // Default (free!)
@@ -285,7 +338,7 @@ const MAP_TILE_STYLE = 'dark-v10'; // style for chosen vendor
 const MAP_TILE_ACCESS_TOKEN = 'your_access_token_here';
 ```
 
-Each `MAP_TILE_VENDOR` provides multiple `MAP_TILE_STYLE` options. Ensure the style matches your selected vendor. For available `MAP_TILE_STYLE` names, refer to the definitions in `src/utils/const.ts`.
+Each `MAP_TILE_VENDOR` provides multiple `MAP_TILE_STYLE` options. Ensure the style matches your selected vendor. For available `MAP_TILE_STYLE` names, refer to the classic theme's map configuration.
 
 When using **"mapbox"**, **"maptiler"** or **"stadiamaps"**, you must configure an `ACCESS_TOKEN`. The default token may cause quota limit issues if not replaced.
 
@@ -293,48 +346,42 @@ When using **"mapbox"**, **"maptiler"** or **"stadiamaps"**, you must configure 
 - **MapTiler**: Register at [https://cloud.maptiler.com/auth/widget](https://cloud.maptiler.com/auth/widget) (Free tier available)
 - **Stadia Maps**: Sign up at [https://client.stadiamaps.com/signup/](https://client.stadiamaps.com/signup/) (Free tier available)
 
-## Custom your page
+## Theme System (3.0)
 
-- Find `src/static/site-metadata.ts` in the repository directory, find the following content, and change it to what you want.
+Running Page 3.0 introduces a pluggable theme architecture. Built-in themes include **Dashboard** (modern single-page layout) and **Classic** (original multi-page layout).
 
-```typescript
-siteMetadata: {
-  siteTitle: 'Running Page', #website title
-  siteUrl: 'https://yihong.run', #website url
-  logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTtc69JxHNcmN1ETpMUX4dozAgAN6iPjWalQ&usqp=CAU', #logo img
-  description: 'Personal site and blog',
-  navLinks: [
-    {
-      name: 'Blog', #navigation name
-      url: 'https://yihong.run/running', #navigation url
-    },
-    {
-      name: 'About',
-      url: 'https://github.com/yihong0618/running_page/blob/master/README-CN.md',
-    },
-  ],
-},
+### Switching Themes
+
+Edit `config.yml` and rebuild:
+
+```yaml
+# dashboard | classic | custom
+theme_preset: classic
 ```
 
-- Modifying styling in `src/utils/const.ts`
+> For detailed architecture, theme descriptions, custom theme creation, and the shared core layer API, see **[docs/theme-system.md](docs/theme-system.md)**.
 
-```typescript
-// styling: set to `false` if you want to disable dash-line route
-const USE_DASH_LINE = true;
-// styling: route line opacity: [0, 1]
-const LINE_OPACITY = 0.4;
-// styling: set to `true` if you want to display only the routes without showing the map
-// Note: This config only affects the page display; please refer to "privacy protection" below for data protection
-// update for now 2024/11/17 the privacy mode is true
-const PRIVACY_MODE = true;
-// update for now 2024/11/17 the lights on default is false
-// styling: set to `false` if you want to make light off as default, only effect when `PRIVACY_MODE` = false
-const LIGHTS_ON = false;
-// set to `true` if you want to show the 'Elevation Gain' column
-const SHOW_ELEVATION_GAIN = true;
+## Custom your page (3.0)
+
+All personalization is done through `config.yml` at the project root. Edit this file directly — no code changes needed.
+
+```yaml
+# config.yml
+mapbox_token: 'your-token-here'   # https://account.mapbox.com
+avatar: 'https://...'              # Profile avatar URL
+locale: zh                         # zh | en
+theme: dark                        # system | light | dark
+theme_preset: dashboard            # dashboard | classic | custom
+
+goals:
+  Run:
+    yearly: 2000                   # Annual distance target (km)
+    monthly: 150                   # Monthly distance target (km)
+    weekly: 35                     # Weekly distance target (km)
+    unit: distance                 # distance (km) | time (minutes)
 ```
 
-- To use Google Analytics, you need to modify the configuration in the `src/utils/const.ts` file.
+- To use Google Analytics, you need to modify the configuration in the `src/utils/analytics.ts` file (if present).
 
 ```typescript
 const USE_GOOGLE_ANALYTICS = false;
@@ -609,6 +656,9 @@ python run_page/nike_sync.py eyJhbGciThiMTItNGIw******
 <summary> Get your <code>Strava</code> data </summary>
 
 <br>
+
+> [!NOTE]
+> Strava updated its Developer Program in June 2026. If you use Strava as the data source, or upload activities to Strava before syncing, check your app tier in the [Strava API settings dashboard](https://www.strava.com/settings/api). Standard Tier developers need a Strava subscription to access the API; existing Standard Tier developers are affected from June 30, 2026. See [Strava's announcement](https://communityhub.strava.com/insider-journal-9/an-update-to-our-developer-program-13428) for details.
 
 1. Sign in/Sign up [Strava](https://www.strava.com/) account
 2. Open after successful Signin [Strava Developers](http://developers.strava.com) -> [Create & Manage Your App](https://strava.com/settings/api)
@@ -1162,7 +1212,7 @@ For more display effects, see:
 5. If you want to deploy your running_page to xxx.github.io instead of xxx.github.io/running_page or redirect your GitHub Pages to a custom domain, you need to do three things:
    - Rename your forked running_page repository to `xxx.github.io`, where xxx is your GitHub username
    - Modify the Build module in gh-pages.yml, remove `${{ github.event.repository.name }}` and change to `run: PATH_PREFIX=/ pnpm build`
-   - In `src/static/site-metadata.ts`, set siteUrl: '' or your custom domain URL
+   - In `config.yml`, set your custom domain URL or leave empty
 
 </details>
 

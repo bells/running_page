@@ -28,3 +28,4 @@ route.svg
 .env
 
 .codegraph/
+.playwright-cli/

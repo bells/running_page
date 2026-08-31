@@ -8,7 +8,7 @@
 
 - 这是 Watson（bells）的个人运动主页，线上地址为 `https://run.watsonzhu.cn/`。
 - 仓库是 `yihong0618/running_page` 的长期维护分支；当前远端 `origin` 指向 `bells/running_page`，默认分支为 `master`。
-- 项目不是实时 API 应用。Python 负责同步、清洗和生成运动数据，React/Vite 在构建时静态导入生成结果并发布为静态站点。
+- 项目不是实时 API 应用。Python 负责同步、清洗和生成运动数据，React/Vite 把生成结果作为静态资源发布；页面通过构建产物 URL 加载 JSON，不存在运行时业务后端。
 - 上游功能和 Watson 的个性化改动长期共存。同步上游或重构时，先查 Git 历史和实际差异，保留个人数据、文案、地图设置、隐私处理与页面定制。
 
 ## 核心数据流
@@ -25,30 +25,32 @@
 
 - `run_page/generator/db.py` 定义 SQLAlchemy `Activity` 模型、`ACTIVITY_KEYS` 和写入逻辑。
 - `run_page/generator/__init__.py` 负责加载、连续运动统计、隐私过滤和室内轨迹修复等归一化逻辑。
-- `src/utils/utils.ts` 中的 `Activity` interface 是前端数据契约。修改数据库字段或 JSON 形状时，必须同步检查 Python 模型、`ACTIVITY_KEYS`、生成逻辑、TypeScript interface 和所有消费者。
-- `src/hooks/useActivities.ts` 静态导入 `src/static/activities.json`，因此数据变化需要重新构建，不存在运行时后端请求。
+- `src/core/types.ts` 的 `Activity` 是 Dashboard 的前端数据契约，Classic 兼容契约位于 `src/themes/classic/utils/utils.ts`。修改数据库字段或 JSON 形状时，必须同步检查 Python 模型、`ACTIVITY_KEYS`、生成逻辑、两份 TypeScript interface 和所有消费者。
+- `src/core/hooks/useActivities.ts` 与 `src/themes/classic/hooks/useActivities.ts` 都使用 `src/static/activities.json?url` 和模块级 Suspense cache。数据变化需要重新构建；`fetch` 指向同一站点的静态构建资产，不代表存在后端 API。
 
 ## 目录职责
 
-- `src/pages/index.tsx`：主页面，负责年份/城市/标题筛选、地图联动、单条轨迹定位和动画状态。
-- `src/pages/total.tsx`：`/summary` 汇总页入口。
-- `src/components/RunMap/`：地图样式、图层、轨迹与交互；真实瓦片加载仍依赖网络和供应商可用性。
-- `src/components/ActivityList/`、`RunTable/`、`YearsStat/`、`LocationStat/`：统计和列表展示。
-- `src/hooks/`：静态数据、主题、站点元信息及通用交互 Hook。
-- `src/utils/const.ts`：地图、隐私、语言、单位和展示开关等全局配置。
+- `config.yml`：3.0 的个性化入口，控制主题预设、语言、外观、运动目标和 Mapbox token fallback；当前个人站点使用 `classic`。
+- `src/App.tsx`：主题注册与懒加载入口；内置 `dashboard` 和 `classic`，未知主题回退到 Dashboard。
+- `src/core/`：跨主题共享的配置、类型、i18n 和活动数据 Hook；根目录 `src/config.ts`、`src/types.ts`、`src/hooks/*` 多为兼容 bridge。
+- `src/themes/dashboard/`：3.0 单页 Dashboard 主题；通用卡片、轨迹页和中国地图组件位于 `src/components/`。
+- `src/themes/classic/`：Watson 当前使用的旧版多页面主题。`pages/index.tsx` 负责筛选和地图联动，`pages/total.tsx` 对应 `/summary`，地图、列表、年份与地区统计都在该主题目录内。
+- `src/themes/classic/utils/const.ts`：Classic 的地图供应商、隐私、单位和展示开关；真实瓦片加载仍依赖网络和供应商可用性。
+- `docs/theme-system.md`：主题扩展边界和新增主题流程。
 - `run_page/`：数据源适配器、数据库、格式转换及 SVG 生成器。
 - `.github/workflows/run_data_sync.yml`：数据同步、生成、提交和部署编排。
 - `GPX_OUT/`、`TCX_OUT/`、`FIT_OUT/`、`activities/`、`run_page/data.db`、`src/static/activities.json`、`assets/*.svg`：数据或生成资产，不是普通手写源码。
 
 ## 前端约定
 
-- 使用 React 18、TypeScript strict mode、Vite、React Router、Mapbox GL/React Map GL、Recharts 和 CSS Modules/Tailwind。
+- 使用 React 19、TypeScript 6 strict mode、Vite 8、React Router 7、Mapbox GL/React Map GL、Recharts 和 CSS Modules/Tailwind 4。
+- 跨主题能力优先进入 `src/core/`；仅 Classic 需要的交互和视觉逻辑留在 `src/themes/classic/`，不要让兼容 bridge 重新成为实现源。
 - 保持组件单一职责；复杂派生状态放入纯函数、Hook 或 service，避免继续扩大页面组件。
 - 新代码禁止使用 `any`。遇到外部库或未知数据先用 `unknown`、明确 interface 或 union 做类型收窄；修改现有 `any` 时优先顺手消除。
-- 路径别名为 `@/* -> src/*`、`@assets/* -> assets/*`。
-- 主路由为 `/`、`/summary` 和兜底页；部署子路径由 `PATH_PREFIX` / `import.meta.env.BASE_URL` 控制，改路由时必须验证 GitHub Pages 子路径。
+- 路径别名为 `@/* -> src/*`、`@core/* -> src/core/*`、`@themes/* -> src/themes/*`、`@assets/* -> assets/*` 和 `@config -> config.yml`；Vite 与 `tsconfig.json` 必须保持对称。
+- Classic 路由为 `/`、`/summary` 和兜底页；Dashboard 是单页主题。部署子路径由 `PATH_PREFIX` / `import.meta.env.BASE_URL` 控制，改路由时必须验证 `BrowserRouter basename` 与 GitHub Pages 子路径。
 - 地图和响应式改动至少考虑桌面、窄屏和触摸设备，并检查亮/暗主题、隐私模式、无轨迹数据和瓦片失败状态。
-- `src/utils/const.ts` 中的公开 Mapbox token 仍应按公开客户端凭据对待；不要提交账户密钥、平台密码、refresh token 或 Garmin secret string。
+- `VITE_MAPBOX_TOKEN` 和 `config.yml` 中的 Mapbox token 都会进入客户端构建产物，只能使用受 URL/域名限制的公开 token；不要提交账户密钥、平台密码、refresh token 或 Garmin secret string。
 
 ## Python 与数据约定
 
@@ -92,6 +94,7 @@ pnpm dev
 
 ```bash
 pnpm run check
+pnpm exec tsc --noEmit
 pnpm exec eslint src --ext .ts,.tsx
 pnpm run build
 ```
@@ -107,7 +110,7 @@ ruff check .
 ```
 
 - CI 还会运行 `python run_page/gpx_sync.py`，它属于数据路径检查，可能接触生成资产；本地执行前先确认任务范围和工作树。
-- 仓库当前没有独立的前端单元测试套件，CodeGraph 也未发现相关覆盖。涉及筛选、统计、地图、主题、动画或数据生成时，应补充针对性测试；无法自动覆盖的浏览器/地图行为要明确说明手工验证边界。
+- 仓库当前没有独立的前端单元测试套件。涉及筛选、统计、地图、主题、动画或数据生成时，应补充针对性测试；修改共享层或主题注册时，至少分别用 `theme_preset: classic` 和 `theme_preset: dashboard` 构建，之后恢复用户配置。无法自动覆盖的浏览器/地图行为要明确说明手工验证边界。
 - 只改文档时至少运行 `git diff --check`；改前端运行 check、非修复型 ESLint 和 build；改 Python 运行 Black、Ruff 与相关脚本的最小安全测试；改数据管道需额外审计生成 diff。
 
 ## Git 与交付
